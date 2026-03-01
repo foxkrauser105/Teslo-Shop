@@ -35,6 +35,12 @@ export const CustomHeader = () => {
     setSearchParams(newSearchParams);
   }
 
+  const clearQuery = () => {
+    if (inputRef.current){
+      inputRef.current.value = "";
+    }
+  }
+
   return <header className="sticky top-0 z-50 w-full border-b backdrop-blur bg-slate-50">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex h-16 items-center justify-between">
@@ -47,28 +53,32 @@ export const CustomHeader = () => {
               to="/" 
               className={cn(
                 `text-sm font-medium transition-colors hover:text-primary`,
-                StringUtils.StringIsNullEmptyOrWhiteSpace(gender) ? 'underline underline-offset-4' : '')}>
+                StringUtils.StringIsNullEmptyOrWhiteSpace(gender) ? 'underline underline-offset-4' : '')}
+                onClick={() => clearQuery()}>
               Todos
             </Link>
             <Link 
               to="/gender/men" 
               className={cn(
                 `text-sm font-medium transition-colors hover:text-primary`,
-                gender === URLParamKeysTypes.GenderMen ? 'underline underline-offset-4' : '')}>
+                gender === URLParamKeysTypes.GenderMen ? 'underline underline-offset-4' : '')}
+                onClick={() => clearQuery()}>
               Hombres
             </Link>
             <Link 
               to="/gender/women" 
               className={cn(
                 `text-sm font-medium transition-colors hover:text-primary`,
-                gender === URLParamKeysTypes.GenderWomen ? 'underline underline-offset-4' : '')}>
+                gender === URLParamKeysTypes.GenderWomen ? 'underline underline-offset-4' : '')}
+                onClick={() => clearQuery()}>
               Mujeres
             </Link>
             <Link 
               to="/gender/kid" 
               className={cn(
                 `text-sm font-medium transition-colors hover:text-primary`,
-                gender === URLParamKeysTypes.GenderKid ? 'underline underline-offset-4' : '')}>
+                gender === URLParamKeysTypes.GenderKid ? 'underline underline-offset-4' : '')}
+                onClick={() => clearQuery()}>
               Niños
             </Link>
           </nav>

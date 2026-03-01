@@ -6,7 +6,8 @@ export const URLParamKeysTypes = {
     Query: 'query',
     GenderMen: 'men',
     GenderWomen: 'women',
-    GenderKid: 'kid'
+    GenderKid: 'kid',
+    Limit: 'limit'
 } as const;    
 
 export type URLParamKeysType = typeof URLParamKeysTypes[keyof typeof URLParamKeysTypes];
