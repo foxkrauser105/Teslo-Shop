@@ -11,6 +11,7 @@ import { ShopLayout } from './shop/layouts/ShopLayout';
 import { GenderPage } from './shop/pages/gender/GenderPage';
 import { ProductPage } from './shop/pages/product/ProductPage';
 import { lazy } from 'react';
+import { AdminRoute, NotAuthenticatedRoute } from './auth/routes/ProtectedRoutes';
 
 const AuthLayout = lazy(() => import('./auth/layouts/AuthLayout'));
 const AdminLayout = lazy(() => import('./admin/layouts/AdminLayout'));
@@ -48,7 +49,10 @@ export const Paths: IPath[] = [
     //Auth Routes
     {
         path: "/auth",
-        element: <AuthLayout />,
+        element: 
+        <NotAuthenticatedRoute>
+            <AuthLayout />
+        </NotAuthenticatedRoute>,
         index: false
     },
     {
@@ -73,7 +77,10 @@ export const Paths: IPath[] = [
     //Admin Routes
     {
         path: "/admin",
-        element: <AdminLayout />,
+        element: 
+        <AdminRoute>
+            <AdminLayout />
+        </AdminRoute>,
         index: false
     },
     {

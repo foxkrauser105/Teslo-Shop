@@ -3,14 +3,65 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CustomLogo } from "@/components/custom/CustomLogo"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
+import { useAuthStore } from "@/auth/store/auth.store"
+import { useState, type FormEvent } from "react"
+import { toast } from "sonner"
+import { StringUtils } from "@/shared/utils/stringUtils"
 
 export const RegisterPage = () => {
+
+  const [isPosting, setIsPosting] = useState(false);
+  const navigate = useNavigate();
+  const { register } = useAuthStore();
+  
+  const handleRegisterFormSubmit = async(event: FormEvent<HTMLFormElement>): Promise<void> => {
+
+    event.preventDefault();
+    setIsPosting(true);
+
+    const formData: FormData = new FormData(event.target as HTMLFormElement);
+
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+
+    if (StringUtils.StringIsNullEmptyOrWhiteSpace(email) ||
+        StringUtils.StringIsNullEmptyOrWhiteSpace(password) ||
+        StringUtils.StringIsNullEmptyOrWhiteSpace(confirmPassword) ||
+        StringUtils.StringIsNullEmptyOrWhiteSpace(firstName) ||
+        StringUtils.StringIsNullEmptyOrWhiteSpace(lastName)) {
+      toast.error("Must fill all fields to create an account. Don't use blank spaces.");
+      setIsPosting(false);
+      return;
+    }
+
+    if (password.trim() !== confirmPassword.trim()){
+      toast.error("Passwords don't match.");
+      setIsPosting(false);
+      return;
+    }
+
+    const isValidRegister = await register(email, password, `${firstName} ${lastName}`);
+
+    if (isValidRegister){
+      navigate('/');
+      return;
+    }
+
+    toast.error("Error trying to create account. Please try again.");
+    setIsPosting(false);
+  }
+
   return (
     <div className={"flex flex-col gap-6"}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form 
+            className="p-6 md:p-8"
+            onSubmit={handleRegisterFormSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
                 <CustomLogo />
@@ -19,25 +70,53 @@ export const RegisterPage = () => {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" type="text" placeholder="First Name" required />
+                <Input 
+                  id="firstName" 
+                  name="firstName" 
+                  type="text" 
+                  placeholder="First Name" 
+                  required />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" type="text" placeholder="Last Name" required />
+                <Input 
+                  id="lastName" 
+                  name="lastName" 
+                  type="text" 
+                  placeholder="Last Name" 
+                  required />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required />
+                <Input 
+                  id="email" 
+                  name="email"
+                  type="email" 
+                  placeholder="m@example.com" 
+                  required />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" required placeholder="*******"/>
+                <Input 
+                  id="password"
+                  name="password" 
+                  type="password" 
+                  required 
+                  placeholder="*******"/>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Confirm Password</Label>
-                <Input id="password" type="password" required placeholder="*******"/>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input 
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password" 
+                  required 
+                  placeholder="*******"/>
               </div>
-              <Button type="submit" className="w-full">
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isPosting}>
                 Create Account
               </Button>
               <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">

@@ -7,10 +7,14 @@ import { URLParamKeysTypes } from "@/shared/types/URLParamKeysTypes";
 import { StringUtils } from "@/shared/utils/stringUtils";
 import { cn } from "@/lib/utils";
 import { CustomLogo } from "@/components/custom/CustomLogo";
+import { useAuthStore } from "@/auth/store/auth.store";
+import { AuthStatus } from "@/auth/types/AuthTypes";
 
 export const CustomHeader = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const { authStatus, logout, isAdmin } = useAuthStore();
+
   const { gender } = useParams();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -101,18 +105,33 @@ export const CustomHeader = () => {
             <Button variant="ghost" size="icon" className="md:hidden">
               <Search className="h-5 w-5" />
             </Button>
-            
-            <Link to='/auth/login'>
-              <Button variant='default' size='sm' className="ml-2">
-                Login
-              </Button>
-            </Link>
 
-            <Link to='/admin'>
-              <Button variant='destructive' size='sm' className="ml-2">
-                Admin
-              </Button>
-            </Link>
+            {
+              authStatus === AuthStatus.NotAuthenticated ? (
+                <Link to='/auth/login'>
+                  <Button variant='default' size='sm' className="ml-2">
+                    Login
+                  </Button>
+                </Link>
+              ) : (
+                <Button 
+                  variant='outline' 
+                  size='sm' 
+                  className="ml-2"
+                  onClick={logout}>
+                  Logout
+                </Button>
+              )
+            }
+            {
+              isAdmin() && (
+                <Link to='/admin'>
+                  <Button variant='destructive' size='sm' className="ml-2">
+                    Admin
+                  </Button>
+                </Link>
+              )
+            }
           </div>
         </div>
       </div>
