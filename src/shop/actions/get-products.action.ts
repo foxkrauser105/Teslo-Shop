@@ -1,5 +1,6 @@
 import { tesloApi } from "@/api/tesloApi"
 import type { ProductsResponse } from "@/interfaces/products.response";
+import { setURLToImagesInProducts } from "@/lib/product-images-setter";
 
 interface Options {
     limit?: number | string | undefined;
@@ -22,10 +23,7 @@ export const getProductsAction = async(options: Options): Promise<ProductsRespon
         }
     });
 
-    const productsWithImageUrl = data.products.map(p => ({
-        ...p,
-        images: p.images.map(i => `${import.meta.env.VITE_API_URL}/files/product/${i}`)
-    }));
+    const productsWithImageUrl = setURLToImagesInProducts(data.products);
 
     return {
         ...data,

@@ -15,12 +15,14 @@ export interface Product {
 }
 
 export const Size = Object.freeze({
-    L: "L",
-    M: "M",
-    S: "S",
-    Xl: "XL",
+    Xxs: "XXS",
     Xs: "XS",
+    S: "S",
+    M: "M",
+    L: "L",
+    Xl: "XL",
     Xxl: "XXL",
+    Xxxl: "XXXL"
 });
 
 export const Gender = Object.freeze({
@@ -30,5 +32,5 @@ export const Gender = Object.freeze({
     Unisex: "unisex"
 });
 
-export type SizeType = [keyof typeof Size];
-export type GenderType = [keyof typeof Gender];
+export type SizeType = typeof Size[keyof typeof Size];
+export type GenderType = typeof Gender[keyof typeof Gender];
