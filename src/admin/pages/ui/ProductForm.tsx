@@ -35,8 +35,7 @@ export const ProductForm = ({title, subTitle, product, isPosting, onSubmit}: Pro
         formState: {errors},
         getValues,
         setValue,
-        watch,
-        reset
+        watch
     } = useForm<FormInputs>({
         defaultValues: product
     });
@@ -44,14 +43,15 @@ export const ProductForm = ({title, subTitle, product, isPosting, onSubmit}: Pro
     const [dragActive, setDragActive] = useState(false);
     const inputTagRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-        reset();
-    }, [product]);
-
     const selectedSizes = watch('sizes');
     const selectedTags = watch('tags');
     const currentStock = watch('stock');
-    const pendingImagesToSubmit = watch('files') || [];
+    
+    const [pendingImagesToSubmit, setPendingImagesToSubmit] = useState<File[]>([]);
+
+    useEffect(() => {
+        setPendingImagesToSubmit([]);
+    }, [product]);
 
     const addTag = () => {
         const tag = inputTagRef.current?.value?.trim();
@@ -118,21 +118,13 @@ export const ProductForm = ({title, subTitle, product, isPosting, onSubmit}: Pro
         setDragActive(false);
         const files = e.dataTransfer.files;
         
-        if (!files) {
-            return
-        }
-
-        setValue('files', [...(getValues('files') || []), ...files] );
+        setImagesInForm([...files]);
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files: FileList | null = e.target.files;
+        const files = e.target.files || [];
         
-        if (!files) {
-            return;
-        }
-
-        setValue('files', [...(getValues('files') || []), ...files] );
+        setImagesInForm([...files]);
     };
 
     const handlePendingImagesDeletion = (file: File): void => {
@@ -141,6 +133,17 @@ export const ProductForm = ({title, subTitle, product, isPosting, onSubmit}: Pro
         }
 
         setValue('files', getValues('files')?.filter(f => f !== file));
+    }
+
+    const setImagesInForm = (files: File[]): void => {
+
+        if (!files) {
+            return
+        }
+
+        setPendingImagesToSubmit(prev => [...prev, ...files]);
+
+        setValue('files', [...(getValues('files') || []), ...files] );
     }
 
     return (
