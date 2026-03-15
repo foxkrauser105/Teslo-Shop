@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 
 import { useForm } from 'react-hook-form'
@@ -17,11 +17,15 @@ interface Props {
     product: Product;
     isPosting: boolean;
 
-    onSubmit: (productLike: Partial<Product>) => Promise<void>;
+    onSubmit: (productLike: Partial<Product> & { files?: File[] }) => Promise<void>;
 }
 
 //const availableSizes: SizeType[] = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 const availableSizes: SizeType[] = Array.from(Object.values(Size) as SizeType[]);
+
+interface FormInputs extends Product {
+    files?: File[]
+}
 
 export const ProductForm = ({title, subTitle, product, isPosting, onSubmit}: Props) => {
 
@@ -31,17 +35,23 @@ export const ProductForm = ({title, subTitle, product, isPosting, onSubmit}: Pro
         formState: {errors},
         getValues,
         setValue,
-        watch
-    } = useForm({
+        watch,
+        reset
+    } = useForm<FormInputs>({
         defaultValues: product
     });
+
+    const [dragActive, setDragActive] = useState(false);
+    const inputTagRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        reset();
+    }, [product]);
 
     const selectedSizes = watch('sizes');
     const selectedTags = watch('tags');
     const currentStock = watch('stock');
-
-    const [dragActive, setDragActive] = useState(false);
-    const inputTagRef = useRef<HTMLInputElement>(null);
+    const pendingImagesToSubmit = watch('files') || [];
 
     const addTag = () => {
         const tag = inputTagRef.current?.value?.trim();
@@ -107,13 +117,31 @@ export const ProductForm = ({title, subTitle, product, isPosting, onSubmit}: Pro
         e.stopPropagation();
         setDragActive(false);
         const files = e.dataTransfer.files;
-        console.log(files);
+        
+        if (!files) {
+            return
+        }
+
+        setValue('files', [...(getValues('files') || []), ...files] );
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        console.log(files);
+        const files: FileList | null = e.target.files;
+        
+        if (!files) {
+            return;
+        }
+
+        setValue('files', [...(getValues('files') || []), ...files] );
     };
+
+    const handlePendingImagesDeletion = (file: File): void => {
+        if (!file){
+            return;
+        }
+
+        setValue('files', getValues('files')?.filter(f => f !== file));
+    }
 
     return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -406,14 +434,14 @@ export const ProductForm = ({title, subTitle, product, isPosting, onSubmit}: Pro
                     {product.images.map((image, index) => (
                     <div key={index} className="relative group">
                         <div className="aspect-square bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center">
-                        <img
-                            src={image}
-                            alt="Product"
-                            className="w-full h-full object-cover rounded-lg"
-                        />
+                            <img
+                                src={image}
+                                alt="Product"
+                                className="w-full h-full object-cover rounded-lg"
+                            />
                         </div>
                         <button className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <X className="h-3 w-3" />
+                            <X className="h-3 w-3" />
                         </button>
                         <p className="mt-1 text-xs text-slate-600 truncate">
                         {image}
@@ -421,6 +449,35 @@ export const ProductForm = ({title, subTitle, product, isPosting, onSubmit}: Pro
                     </div>
                     ))}
                 </div>
+                </div>
+
+                {/* Images pending to submit */}
+                <div className="mt-6 space-y-3">
+                    <h3 className={cn(
+                        "text-sm font-medium text-slate-700", {
+                            hidden: pendingImagesToSubmit.length === 0
+                        }
+                    )}>
+                        Images pending to submit
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                        {
+                            pendingImagesToSubmit.map((file, index) => (
+                                <div key={index} className="relative group">
+                                    <div className="aspect-square bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center">
+                                        <img
+                                            src={URL.createObjectURL(file)}
+                                            alt="Product"
+                                            className="w-full h-full object-cover rounded-lg"
+                                        />
+                                    </div>
+                                    <button className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                        <X className="h-3 w-3" onClick={() => handlePendingImagesDeletion(file)} />
+                                    </button>
+                                </div>
+                            ))
+                        }
+                    </div>
                 </div>
             </div>
 
