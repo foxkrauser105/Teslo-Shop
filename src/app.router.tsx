@@ -1,4 +1,4 @@
-import { createBrowserRouter, type RouteObject } from "react-router";
+import { createHashRouter, type RouteObject } from "react-router";
 
 import { Paths } from "./app.routes.list";
 import { ErrorPage } from "./shared/components/ErrorPage";
@@ -34,5 +34,5 @@ const createRoutes = (): RouteObject[] => {
     return routes;
 }
 
-export const appRouter = createBrowserRouter(createRoutes());
-//export const appRouter = createHashRouter(createRoutes());
+//export const appRouter = createBrowserRouter(createRoutes());
+export const appRouter = createHashRouter(createRoutes());
